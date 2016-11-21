@@ -77,7 +77,7 @@ november 2016
 - ... 2M managed domains
 - Hosting VPS and PaaS, Mail
 - around 1,600 servers in 4 Datacenters
-
+- mostly Debian, Nexenta and FreeBSD
 
 - Created in 2001 in France
 - Opened Gandi Asia in Taipei in 2014
@@ -85,8 +85,176 @@ november 2016
 ---
 # Why Puppet at Gandi
 
+- Gandi is more a python shop
+- but puppet is (almost) language agnostic
+- .. with a complete DSL
+
+
+- Debian packaging (debian/nexenta)
+- or FreeBSD pkg-ng
+- deployment is a system update
+
 ---
 # How Puppet at Gandi
+
+- usage of Hiera
+- inventory in ENC
+- custom modules
+- puppet 3.6 with puppetdb
+- automated puppet-lint with jenkins
+- arbitrary branches
+- gitlab workflow
+
+---
+# Global architecture
+
+```
+.----------.        .--------------.
+| ENC file |--------| farm_modules |
+'----------'        '--------------'
+      |                    |
+      |                    |
+.------------.        .---------.
+| hiera file |        | module1 |     .------------.
+| hiera file |        | module2 |---> | puppet run |
+| hiera file |        | module3 |     '------------'
+'------------'        '---------'
+      |                     |
+      '------> params ------'
+```
+---
+# Hiera
+
+- Hierachic declaration of variables
+- inventory file declares farms
+- farms per
+  - type of services
+  - datacenter
+  - country
+  - OS
+  - etc ..
+
+---
+# Hiera farms
+
+```bash
+$ ls -1 params
+common
+country
+datacenter
+datacenter_virtualdc
+farm
+farm_datacenter
+farm_datacenter_flavor
+farm_datacenter_step
+farm_flavor
+farm_flavor_step
+farm_step
+nodes
+os
+os-lsb
+room
+```
+
+---
+# Hiera file example
+
+```yaml
+apt_config:
+  experimental:
+    enabled: "true"
+
+monitoring_config:
+  default:
+    host:
+      contact_groups: "stage_platform"
+    service:
+      contact_groups: "stage_platform"
+```
+
+---
+# External Nodes Classifier
+
+- declaration of node (serveur)
+- definition of what params apply
+
+```bash
+$ cat enc/consul1.bi1.0x35.net.yaml
+---
+classes:
+  - consulnode       # <-- farm_modules/consulnode/manifests/init.pp
+parameters:
+  country: lu        # <-- params/country/lu.yaml
+  datacenter: dc2    # <-- params/datacenter/dc2.yaml
+  farm: consulnode   # <-- params/farm/consulnode.yaml
+```
+- 310 modules
+
+---
+# Farm_modules
+
+```bash
+# consulnode farm
+class consulnode {
+    include base_modules
+    include ssmtp
+    include sysctl
+    include snmpd
+    include collectd
+    include monitoring
+
+    include consul   # <-- modules/consul/
+}
+```
+
+---
+# Modules
+
+```bash
+modules/consul
+├── files
+│   └── default
+├── manifests
+│   ├── config.pp
+│   ├── cron.pp
+│   ├── files.pp
+│   ├── init.pp
+│   ├── install.pp
+│   ├── service.pp
+│   └── user.pp
+├── metadata.json
+├── README
+└── templates
+    └── default
+        └── etc
+            ├── consul.d
+            │   └── 42-gandi.json.erb
+            └── default
+                └── consul.erb
+```
+
+---
+# Manifests
+
+```ruby
+# consul::files handles static/blob files
+class consul::files inherits globals::files {
+    motd::register{ $name: }
+
+    # default options for file provider
+    File {
+        require => Class['consul::install'],
+        notify  => Class['consul::service']
+    }
+
+    file {
+        '/srv/consul':
+            ensure => directory,
+            owner  => 'consul',
+            group  => 'consul';
+    }
+}
+```
 
 ---
 # Extra Puppet Tools
