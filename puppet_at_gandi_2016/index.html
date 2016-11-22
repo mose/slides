@@ -49,21 +49,18 @@ november 2016
 - https://github.com/mose
 
 ---
-![gandi.net](img/Puppet-Logo-Amber-Black-sm.png)
-
+![gandi.net](img/Puppet-Logo-Amber-Black-sm.png)  
 - Configuration Management Framework
 - extensible and modular
 - not orchestrator
 - not lightweight
 
 
-- writen in Ruby
-- ... but no ruby knowledge needed
+- writen in Ruby (and some clojure)
 - https://puppetlabs.com
 
 ---
-![gandi.net](img/Gandi_logo_black.jpg)
-
+![gandi.net](img/Gandi_logo_black.jpg)  
 - Domain Names Registrar, 2M domains
 - Hosting VPS, PaaS, Mail
 - 1,600 servers in 4 Datacenters
@@ -71,12 +68,11 @@ november 2016
 - 15 devops in charge
 
 
-- Created in 2001 in France
-- Gandi Asia in Taipei in 2014
+- Created in 2001 in France. Taipei in 2014
 - https://gandi.net
 
 ---
-# Why Puppet at Gandi
+## Why Puppet at Gandi
 
 - Gandi started using puppet in 2009
 - Gandi is more a python shop
@@ -90,15 +86,19 @@ november 2016
 - ... with Puppet
 
 ---
-# Puppet specifics
+## Puppet specifics
 
-- nodes pull configuration and send facts to a central server (puppetmaster)
-- DSL is simple (Gandi is a python shop, no ruby ninjas needed)
+- nodes pull configuration and send facts to a central puppetmaster
+- DSL is simple
 - Descriptive and Idempotent
 - Popular and widely supported
 
+???
+- Gandi is a python shop, no ruby ninjas available
+- we got 4 puppetmasters for redundancy
+- 
 ---
-# How Puppet at Gandi
+## How Puppet at Gandi
 
 - usage of Hiera
 - inventory in ENC
@@ -110,12 +110,14 @@ november 2016
 - monitoring with Nagios
 
 ???
-This is the result of 7 years opf evolution
+This is the result of 7 years of evolution
 - 2009 -> only few people use it because lack of clear conventions
+- 2010 -> it's a mess
 - 2011 -> simple module template
-- 2015 -> use of yaml ENC files
+- 2014 -> integration of the monitoring inside puppet
+- 2015 -> use of yaml ENC files, normalization of modules, CI validations
 ---
-# How it works
+## How it works
 ```
 .-------------.
 | environment |---------------------------.
@@ -144,7 +146,7 @@ This is the result of 7 years opf evolution
 - we begin to cron puppet runs for microservices servers
 
 ---
-# External Nodes Classifier
+## External Nodes Classifier
 
 - declaration of node (serveur)
 - definition of what params apply
@@ -161,7 +163,7 @@ parameters:
 ```
 
 ---
-# Hiera Config
+## Hiera Config
 
 ```yaml
 :backends:
@@ -187,7 +189,7 @@ parameters:
 ```
 
 ---
-# Hiera file example
+## Hiera file example
 
 ```yaml
 apt_config:
@@ -205,7 +207,7 @@ monitoring_config:
 - this is an example of a node params file
 
 ---
-# hiera(rchy)
+## Hiera(rchy)
 
 ```bash
 [-] (merged)
@@ -230,7 +232,7 @@ monitoring_config:
 Sample of output of [Hieracles](https://github.com/Gandi/hieracles)
 
 ---
-# Farm_modules
+## Farm_modules
 
 - 310 modules (all custom)
 
@@ -249,7 +251,7 @@ class consulnode {
 ```
 
 ---
-# Modules
+## Modules
 
 ```bash
 modules/consul
@@ -274,7 +276,7 @@ modules/consul
 ```
 
 ---
-# Manifests
+## Manifests
 
 ```ruby
 # consul::files handles static/blob files
@@ -297,7 +299,7 @@ class consul::files inherits globals::files {
 ```
 
 ---
-# Extra Puppet Tools
+## Extra Puppet Tools
 
 - Facter (gets facts)
 - puppetdb (can be curl'ed)
@@ -314,7 +316,8 @@ Thanks!
 # Any question?
 
 ???
-Deeper presentation with more advanced details on http://pres.gandi.net/sysadmin6/
+- Deeper presentation with more advanced details on http://pres.gandi.net/sysadmin6/
+- this presentation is made with Remark https://github.com/gnab/remark
 
     </textarea>
     <script src="../js/remark-0.14.0.min.js">
