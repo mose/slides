@@ -51,11 +51,11 @@ november 2016
 ---
 ![gandi.net](img/Puppet-Logo-Amber-Black-sm.png)
 
-- Provisionning
-- Configuration management
-- Deployments
-- Orchestration
-
+- Configuration Management Framework
+- extensible
+- Modular
+- not orchestrator
+- not lightweight
 
 - writen in Ruby
 - ... but no ruby knowledge needed
@@ -68,7 +68,7 @@ november 2016
 - Hosting VPS, PaaS, Mail
 - 1,600 servers in 4 Datacenters
 - Debian, Nexenta and FreeBSD
-
+- 20 devops in charge
 
 - Created in 2001 in France
 - Gandi Asia in Taipei in 2014
@@ -77,6 +77,7 @@ november 2016
 ---
 # Why Puppet at Gandi
 
+- Gandi started using puppet in 2009
 - Gandi is more a python shop
 - but puppet is (almost) language agnostic
 - .. with a complete DSL
@@ -86,6 +87,14 @@ november 2016
 - or FreeBSD pkg-ng
 - deployment is a done by system update
 - ... with Puppet
+
+---
+# Puppet specifics
+
+- nodes pull configuration and send facts to a central server (puppetmaster)
+- DSL is simple (Gandi is a python shop, no ruby ninjas needed)
+- Descriptive and Idempotent
+- Popular and widely supported
 
 ---
 # How Puppet at Gandi
@@ -129,41 +138,33 @@ november 2016
   - etc ..
 
 ---
-# Hiera farms
-
-```bash
-$ ls -1 params
-common
-country
-datacenter
-datacenter_virtualdc
-farm
-farm_datacenter
-farm_datacenter_flavor
-farm_datacenter_step
-farm_flavor
-farm_flavor_step
-farm_step
-nodes
-os
-os-lsb
-room
-```
-
----
-# Hiera file example
+# Hiera Config
 
 ```yaml
-apt_config:
-  experimental:
-    enabled: "true"
+:backends:
+  - yaml
+:hierarchy:
+  - "nodes/%{fqdn}"
+  - "farm_datacenter_flavor/%{farm}_%{datacenter}_%{farm_flavor}"
+  - "farm_datacenter_step/%{farm}_%{datacenter}_%{step}"
+  - "farm_datacenter/%{farm}_%{datacenter}"
+  - "farm_flavor_step/%{farm}_%{farm_flavor}_%{step}"
+  - "farm_flavor/%{farm}_%{farm_flavor}"
+  - "farm_step/%{farm}_%{step}"
+  - "farm/%{farm}"
+  - "room/%{room}"
+  - "datacenter_virtualdc/%{datacenter}_%{virtualdc}"
+  - "datacenter/%{datacenter}"
+  - "country/%{country}"
+  - "os-lsb/%{operatingsystem}-%{lsbdistcodename}"
+  - "os/%{operatingsystem}"
+  - "common/common"
+:yaml:
+  :datadir: "/srv/puppet/branches/%{::environment}/params/"
+:puppet:
+  :datasource: data
+:merge_behavior: deeper
 
-monitoring_config:
-  default:
-    host:
-      contact_groups: "stage_platform"
-    service:
-      contact_groups: "stage_platform"
 ```
 
 ---
@@ -183,6 +184,22 @@ parameters:
   farm: consulnode   # <-- params/farm/consulnode.yaml
 ```
 - 310 modules
+
+---
+# Hiera file example
+
+```yaml
+apt_config:
+  experimental:
+    enabled: "true"
+
+monitoring_config:
+  default:
+    host:
+      contact_groups: "stage_platform"
+    service:
+      contact_groups: "stage_platform"
+```
 
 ---
 # Farm_modules
@@ -252,6 +269,36 @@ class consul::files inherits globals::files {
 
 ---
 # Extra Puppet Tools
+
+- many extra tools available
+
+---
+# Facter
+
+```
+$ facter
+[...]
+kernelversion => 3.14.43
+lsbdistcodename => jessie
+lsbdistdescription => Debian GNU/Linux 8.1 (jessie)
+lsbdistid => Debian
+lsbdistrelease => 8.1
+lsbmajdistrelease => 8
+[...]
+country => fr
+datacenter => equinix
+diskdrives => sda,sdb
+diskid_765bc821-a587-45ac-a352-400d2ff8cc0e => sdb
+diskid_d17a4911-c56d-40a8-b8bd-17570826e82e => sda
+diskmodel_sda => QEMU HARDDISK   
+diskmodel_sdb => QEMU HARDDISK   
+diskscheduler_sda => deadline
+diskscheduler_sdb => deadline
+[...]
+```
+
+---
+# Mcollective
 
 
     </textarea>
