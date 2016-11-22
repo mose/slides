@@ -52,10 +52,10 @@ november 2016
 ![gandi.net](img/Puppet-Logo-Amber-Black-sm.png)
 
 - Configuration Management Framework
-- extensible
-- Modular
+- extensible and modular
 - not orchestrator
 - not lightweight
+
 
 - writen in Ruby
 - ... but no ruby knowledge needed
@@ -68,7 +68,8 @@ november 2016
 - Hosting VPS, PaaS, Mail
 - 1,600 servers in 4 Datacenters
 - Debian, Nexenta and FreeBSD
-- 20 devops in charge
+- 15 devops in charge
+
 
 - Created in 2001 in France
 - Gandi Asia in Taipei in 2014
@@ -104,26 +105,30 @@ november 2016
 - custom modules
 - puppet 3.6 with puppetdb
 - automated puppet-lint with jenkins
-- arbitrary branches
-- gitlab workflow
+- arbitrary branches (environment)
+- gitlab workflow with MRs
 - monitoring with Nagios
 
 ---
 # Global architecture
 
 ```
-.----------.        .--------------.
-| ENC file |--------| farm_modules |
-'----------'        '--------------'
-      |                    |
-      |                    |
-.------------.        .---------.
-| hiera file |        | module1 |     .------------.
-| hiera file |        | module2 |---> | puppet run |
-| hiera file |        | module3 |     '------------'
-'------------'        '---------'
-      |                     |
-      '------> params ------'
+.-------------.
+| environment |---------------------------.
+'-------------'                           |
+  | .----------.        .--------------.  |
+  | | ENC file |--------| farm_modules |  |
+  | '----------'        '--------------'  |
+  |       |                    |          |
+  |       |                    |          |
+  | .------------.        .---------.     |
+  | | hiera file |        | module1 |     |    .------------.
+  | | hiera file |        | module2 |--------> | puppet run |
+  | | hiera file |        | module3 |     |    '------------'
+  | '------------'        '---------'     |
+  |       |                    |          |
+  |       '------> params -----'          |
+  '---------------------------------------'
 ```
 ---
 # Hiera
@@ -136,6 +141,24 @@ november 2016
   - country
   - OS
   - etc ..
+
+
+---
+# External Nodes Classifier
+
+- declaration of node (serveur)
+- definition of what params apply
+
+```bash
+$ cat enc/consul1.gandi.yaml
+---
+classes:
+  - consulnode       # <-- farm_modules/consulnode/manifests/init.pp
+parameters:
+  country: lu        # <-- params/country/lu.yaml
+  datacenter: dc2    # <-- params/datacenter/dc2.yaml
+  farm: consulnode   # <-- params/farm/consulnode.yaml
+```
 
 ---
 # Hiera Config
@@ -159,32 +182,9 @@ november 2016
   - "os-lsb/%{operatingsystem}-%{lsbdistcodename}"
   - "os/%{operatingsystem}"
   - "common/common"
-:yaml:
-  :datadir: "/srv/puppet/branches/%{::environment}/params/"
-:puppet:
-  :datasource: data
 :merge_behavior: deeper
 
 ```
-
----
-# External Nodes Classifier
-
-- declaration of node (serveur)
-- definition of what params apply
-
-```bash
-$ cat enc/consul1.bi1.0x35.net.yaml
----
-classes:
-  - consulnode       # <-- farm_modules/consulnode/manifests/init.pp
-parameters:
-  country: lu        # <-- params/country/lu.yaml
-  datacenter: dc2    # <-- params/datacenter/dc2.yaml
-  farm: consulnode   # <-- params/farm/consulnode.yaml
-```
-- 310 modules
-
 ---
 # Hiera file example
 
@@ -203,6 +203,8 @@ monitoring_config:
 
 ---
 # Farm_modules
+
+- 310 modules (all custom)
 
 ```bash
 # consulnode farm
@@ -233,7 +235,6 @@ modules/consul
 │   ├── install.pp
 │   ├── service.pp
 │   └── user.pp
-├── metadata.json
 ├── README
 └── templates
     └── default
@@ -270,36 +271,17 @@ class consul::files inherits globals::files {
 ---
 # Extra Puppet Tools
 
-- many extra tools available
+- Facter (gets facts)
+- puppetdb (can be curl'ed)
+- mcollective (batch operations)
+- hieracles (find hierarchy overrides)
 
 ---
-# Facter
+class: center, middle, front
 
-```
-$ facter
-[...]
-kernelversion => 3.14.43
-lsbdistcodename => jessie
-lsbdistdescription => Debian GNU/Linux 8.1 (jessie)
-lsbdistid => Debian
-lsbdistrelease => 8.1
-lsbmajdistrelease => 8
-[...]
-country => fr
-datacenter => equinix
-diskdrives => sda,sdb
-diskid_765bc821-a587-45ac-a352-400d2ff8cc0e => sdb
-diskid_d17a4911-c56d-40a8-b8bd-17570826e82e => sda
-diskmodel_sda => QEMU HARDDISK   
-diskmodel_sdb => QEMU HARDDISK   
-diskscheduler_sda => deadline
-diskscheduler_sdb => deadline
-[...]
-```
+Thanks!
 
----
-# Mcollective
-
+# Any question?
 
     </textarea>
     <script src="../js/remark-0.14.0.min.js">
