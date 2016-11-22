@@ -109,8 +109,13 @@ november 2016
 - gitlab workflow with MRs
 - monitoring with Nagios
 
+???
+This is the result of 7 years opf evolution
+- 2009 -> only few people use it because lack of clear conventions
+- 2011 -> simple module template
+- 2015 -> use of yaml ENC files
 ---
-# Global architecture
+# How it works
 
 ```
 .-------------.
@@ -130,18 +135,11 @@ november 2016
   |       '------> params -----'          |
   '---------------------------------------'
 ```
----
-# Hiera
-
-- Hierachic declaration of variables
-- inventory file declares farms
-- farms per
-  - type of services
-  - datacenter
-  - country
-  - OS
-  - etc ..
-
+???
+- Environment is not dev/stage/prod
+- environment is about branches and MRs
+- each node/server has one ENC
+- we have 1600 ENC files
 
 ---
 # External Nodes Classifier
@@ -185,6 +183,7 @@ parameters:
 :merge_behavior: deeper
 
 ```
+
 ---
 # Hiera file example
 
@@ -200,6 +199,34 @@ monitoring_config:
     service:
       contact_groups: "stage_platform"
 ```
+- this is an example of a node params file
+
+---
+# hiera - rchy
+
+```bash
+[-] (merged)
+[0] params/farm_datacenter/monworker_dc2.yaml
+[1] params/farm/monworker.yaml
+[2] params/datacenter/dc2.yaml
+[3] params/os/Debian.yaml
+[4] params/common/common.yaml
+
+[1] collectd_config.additional_plugins ["tcpconns"]
+[3] collectd_config.generic_plugins ["vmem"]
+[3] collectd_config.plugin_disk ["/^sd/"]
+[1] collectd_config.plugin_tcpconns []
+[1] collectd_config.plugin_tcpconns_remote ["4730"]
+[1] monitoring_config.dependencies ["libsnmp-ruby1.8", "rpcbind"]
+[0] monitoring_config.services_nrpe.proc_worker_bissen-master-pra.check_command check_procs -u nagios -c 3: -a worker_bissen-master-pra
+[0] monitoring_config.services_nrpe.proc_worker_bissen-master-pra.use generic-service
+[-] monworker_classes ["gandi_hosting_vm"]
+    [0] monworker_classes ["gandi_hosting_vm"]
+    [1] monworker_classes []
+...
+```
+???
+Sample of output of [Hieracles](https://github.com/Gandi/hieracles)
 
 ---
 # Farm_modules
@@ -274,7 +301,8 @@ class consul::files inherits globals::files {
 - Facter (gets facts)
 - puppetdb (can be curl'ed)
 - mcollective (batch operations)
-- hieracles (find hierarchy overrides)
+- hieracles (CLI to find hierarchy overrides)
+- Hieraviiz (hieracles in a web browser)
 
 ---
 class: center, middle, front
