@@ -40,7 +40,7 @@ https://mose.github.io/slides/puppet_at_gandi_2016
 
 ---
 
-# mose
+# mose ( 莫測 )
 
 - DevOps at Gandi Asia since 2014
 
@@ -133,7 +133,10 @@ more Gandi facts
 - inventory in ENC
 - custom modules
 - puppet 3.6 with puppetdb
-- automated puppet-lint with jenkins
+
+
+- puppet code is in internal Gitlab
+- automated validation with jenkins
 - arbitrary branches (environment)
 - gitlab workflow with MRs
 - monitoring with Nagios
@@ -145,6 +148,7 @@ This is the result of 7 years of evolution
 - 2011 -> simple module template
 - 2014 -> integration of the monitoring inside puppet
 - 2015 -> use of yaml ENC files, normalization of modules, CI validations
+
 
 ---
 ## How it works
@@ -179,7 +183,7 @@ as an alternative to mcollective (as ansible can perform arbitrary actions along
 ---
 ## External Nodes Classifier
 
-- declaration of node (serveur)
+- declaration of what farm the node is in
 - definition of what params apply
 
 ```bash
@@ -354,16 +358,16 @@ class consul::files inherits globals::files {
 
 ???
 - this is not really ruby code, but the Puppet DSL
-- the motd::register will add this module name in the motd
+- the `motd::register` will add this module name in the motd
 - that way when we ssh on the server we see what is its configuration
 
 ---
 ## Extra Puppet Tools
 
 - Facter (gets facts)
-- puppetdb (can be curl'ed)
-- mcollective (batch operations)
-- hieracles (CLI to find hierarchy overrides)
+- Puppetdb (can be curl'ed)
+- Mcollective (batch operations)
+- Hieracles (CLI to find hierarchy overrides)
 - Hieraviz (hieracles in a web browser)
 - Ansible (yeah, for provisionning and orchestration)
 
