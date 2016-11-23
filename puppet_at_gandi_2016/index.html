@@ -20,6 +20,7 @@
         font-size: 2em;
       }
       .front { background-color: #000; color: #fff; }
+      .front a { font-size: .9em; color: #9ce; text-decoration: none; }
       .bio {
         background-color: transparent;
       }
@@ -35,8 +36,9 @@ class: center, middle, front
 DevOps Taiwan Meetup  
 november 2016
 
----
+https://mose.github.io/slides/puppet_at_gandi_2016
 
+---
 
 # mose
 
@@ -48,6 +50,13 @@ november 2016
 
 - https://github.com/mose
 
+???
+more on:
+
+- http://blog.mose.com/
+- http://www.linkedin.com/in/ozmose
+- also Editor in Chief http://greenruby.org
+
 ---
 ![gandi.net](img/Puppet-Logo-Amber-Black-sm.png)  
 - Configuration Management Framework
@@ -57,7 +66,19 @@ november 2016
 
 
 - writen in Ruby (and some clojure)
-- https://puppetlabs.com
+- https://puppet.com
+
+???
+and of course totally open-source
+- https://github.com/puppetlabs
+
+Puppet Company facts:
+- founded in 2005
+- 400+ employees in 5 office
+- HQ in Portland, Oregon
+- 30,000 organiszations use puppet
+  - NASA, Redhat, Intel, Sony, etc ...
+- *source https://puppet.com/company*
 
 ---
 ![gandi.net](img/Gandi_logo_black.jpg)  
@@ -70,6 +91,13 @@ november 2016
 
 - Created in 2001 in France. Taipei in 2014
 - https://gandi.net
+
+???
+more Gandi facts
+- offices in Paris, Luxembourg, San Francisco and Taipei
+- 150 employees
+- support 24/24, 6 days per week in english, french and chinese
+- **no bullshit** - as a way of life
 
 ---
 ## Why Puppet at Gandi
@@ -86,7 +114,7 @@ november 2016
 - ... with Puppet
 
 ---
-## Puppet specifics
+## Puppet specificities
 
 - nodes pull configuration and send facts to a central puppetmaster
 - DSL is simple
@@ -94,9 +122,10 @@ november 2016
 - Popular and widely supported
 
 ???
-- Gandi is a python shop, no ruby ninjas available
+- Gandi is a python shop, no ruby ninjas available (or, only one)
 - we got 4 puppetmasters for redundancy
-- 
+- custom flask application to get gitlab hooks and pull new code on puppetmasters
+
 ---
 ## How Puppet at Gandi
 
@@ -116,6 +145,7 @@ This is the result of 7 years of evolution
 - 2011 -> simple module template
 - 2014 -> integration of the monitoring inside puppet
 - 2015 -> use of yaml ENC files, normalization of modules, CI validations
+
 ---
 ## How it works
 ```
@@ -139,11 +169,12 @@ This is the result of 7 years of evolution
 - most runs are still manual
 
 ???
-- Environment is not dev/stage/prod
-- environment is about branches and MRs
+- Environment is not dev/stage/prod, it is about branches and MRs
 - each node/server has one ENC
 - we have 1600 ENC files
 - we begin to cron puppet runs for microservices servers
+- we begin to use Ansible for orchestration and run puppet on several hosts
+as an alternative to mcollective (as ansible can perform arbitrary actions along the way)
 
 ---
 ## External Nodes Classifier
@@ -152,7 +183,7 @@ This is the result of 7 years of evolution
 - definition of what params apply
 
 ```bash
-$ cat enc/consul1.gandi.yaml
+$ cat enc/consul1...gandi.net.yaml
 ---
 classes:
   - consulnode       # <-- farm_modules/consulnode/manifests/init.pp
@@ -161,6 +192,9 @@ parameters:
   datacenter: dc2    # <-- params/datacenter/dc2.yaml
   farm: consulnode   # <-- params/farm/consulnode.yaml
 ```
+
+???
+- we use real FQDN for the name of each ENC file, so they are easy to find
 
 ---
 ## Hiera Config
@@ -188,6 +222,11 @@ parameters:
 
 ```
 
+???
+- if a parameter is not set, the params file is ignored
+- if the params file is not there, it is just not used, without blocking anything
+- the 'common' params file is the base all-hosts params file
+
 ---
 ## Hiera file example
 
@@ -205,6 +244,7 @@ monitoring_config:
 ```
 ???
 - this is an example of a node params file
+- on 1600 ENC files only 843 have node params files, the others just follow default farms configuration
 
 ---
 ## Hiera(rchy)
@@ -230,6 +270,8 @@ monitoring_config:
 ```
 ???
 Sample of output of [Hieracles](https://github.com/Gandi/hieracles)
+- it shows where what param is defined, in which file
+- it also reveals how the params override is handled from which files
 
 ---
 ## Farm_modules
@@ -249,6 +291,10 @@ class consulnode {
     include consul   # <-- modules/consul/
 }
 ```
+???
+- Farms are like a family or a category of servers
+- the name of the farm is (usually) the name of the classes file listing modules
+- we have 2 subcategories that we call **flavor** and **step**
 
 ---
 ## Modules
@@ -263,8 +309,7 @@ modules/consul
 │   ├── files.pp
 │   ├── init.pp
 │   ├── install.pp
-│   ├── service.pp
-│   └── user.pp
+│   └── service.pp
 ├── README
 └── templates
     └── default
@@ -275,6 +320,15 @@ modules/consul
                 └── consul.erb
 ```
 
+???
+- we have some scripts to create new modules according to a strict template
+- all modules have same base manifest files
+- `config.pp` contains definition of erb templates
+- `cron.pp` defines cron jobs
+- `files.pp` lists files and directory creations that are not templated (no variables)
+- `init.pp` initializes the params from hiera for usage in templates
+- `install.pp` lists packages that need to be installed (or removed)
+- `service.pp` manages start and stop of services
 ---
 ## Manifests
 
@@ -298,6 +352,11 @@ class consul::files inherits globals::files {
 }
 ```
 
+???
+- this is not really ruby code, but the Puppet DSL
+- the motd::register will add this module name in the motd
+- that way when we ssh on the server we see what is its configuration
+
 ---
 ## Extra Puppet Tools
 
@@ -308,6 +367,20 @@ class consul::files inherits globals::files {
 - Hieraviz (hieracles in a web browser)
 - Ansible (yeah, for provisionning and orchestration)
 
+
+???
+- facter https://docs.puppet.com/facter/
+- puppetdb https://docs.puppet.com/puppetdb/
+- mcollective https://docs.puppet.com/mcollective/
+- hieracles https://github.com/Gandi/hieracles
+- hieraviz https://github.com/Gandi/hieraviz
+
+
+- we also tried Foreman https://theforeman.org/ but we abandonned it
+
+
+- see http://spencerkrum.com/talks/better-together-cfgmgmtcamp2016/slides/#26
+for another case of using Ansible alongside Puppet
 ---
 class: center, middle, front
 
