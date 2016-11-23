@@ -34,7 +34,7 @@ class: center, middle, front
 # Puppet @ Gandi
 
 DevOps Taiwan Meetup  
-november 2016
+November 2016
 
 https://mose.github.io/slides/puppet_at_gandi_2016
 
@@ -65,7 +65,7 @@ more on:
 - not lightweight
 
 
-- writen in Ruby (and some clojure)
+- written in Ruby (and some clojure)
 - https://puppet.com
 
 ???
@@ -76,7 +76,7 @@ Puppet Company facts:
 - founded in 2005
 - 400+ employees in 5 office
 - HQ in Portland, Oregon
-- 30,000 organiszations use puppet
+- 30,000 organizations use puppet
   - NASA, Redhat, Intel, Sony, etc ...
 - *source https://puppet.com/company*
 
@@ -178,7 +178,7 @@ This is the result of 7 years of evolution
 - we have 1600 ENC files
 - we begin to cron puppet runs for microservices servers
 - we begin to use Ansible for orchestration and run puppet on several hosts
-as an alternative to mcollective (as ansible can perform arbitrary actions along the way)
+as an alternative to mcollective (as Ansible can perform arbitrary actions along the way)
 
 ---
 ## External Nodes Classifier
@@ -330,7 +330,7 @@ modules/consul
 - `config.pp` contains definition of erb templates
 - `cron.pp` defines cron jobs
 - `files.pp` lists files and directory creations that are not templated (no variables)
-- `init.pp` initializes the params from hiera for usage in templates
+- `init.pp` initializes the params from Hiera for usage in templates
 - `install.pp` lists packages that need to be installed (or removed)
 - `service.pp` manages start and stop of services
 ---
@@ -369,7 +369,7 @@ class consul::files inherits globals::files {
 - Mcollective (batch operations)
 - Hieracles (CLI to find hierarchy overrides)
 - Hieraviz (hieracles in a web browser)
-- Ansible (yeah, for provisionning and orchestration)
+- Ansible (yeah, for provisioning and orchestration)
 
 
 ???
@@ -380,7 +380,7 @@ class consul::files inherits globals::files {
 - hieraviz https://github.com/Gandi/hieraviz
 
 
-- we also tried Foreman https://theforeman.org/ but we abandonned it
+- we also tried Foreman https://theforeman.org/ but we abandoned it
 
 
 - see http://spencerkrum.com/talks/better-together-cfgmgmtcamp2016/slides/#26
